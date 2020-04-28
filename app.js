@@ -1,10 +1,12 @@
-const mongoose = require('mongoose');
 
+require("dotenv").config()
+
+const mongoose = require('mongoose');
 const express=require("express")
 const app =express();
 
 //shoes is the name of database
-mongoose.connect("mongodb://localhost:27017/shoes",{
+mongoose.connect(process.env.DATABASE,{
     useNewUrlParser:true,
     useUnifiedTopology: true,
     useCreateIndex:true
@@ -12,7 +14,7 @@ mongoose.connect("mongodb://localhost:27017/shoes",{
     console.log("DB CONNECTED")
 })
 
-const port=8001;
+const port=process.env.PORT||8001 ;
 app.listen(port,() =>{
     console.log(`app is running at ${port}`);
 });
