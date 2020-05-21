@@ -20,7 +20,7 @@ mongoose.connect(process.env.DATABASE,{
 
 //middleware
 app.use(bodyParser.json());
-app.use(cookieParser());
+app.use(cookieParser());//create/delete values into cookie
 app.use(cors());
 
 //routes
