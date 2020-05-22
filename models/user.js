@@ -1,4 +1,3 @@
-
 var mongoose = require('mongoose');
 const crypto = require('crypto');
 const uuidv1 = require('uuid/v1'); 
@@ -55,13 +54,13 @@ userSchema.virtual("password")
 
 userSchema.methods={
 
-    authenticate:function(plainpassword)
-    {this.securePassword(plainpassword)===this.encry_password},
-
+  authenticate: function(plainpassword) {
+    return this.securePassword(plainpassword) === this.encry_password;
+  },
     securePassword: function(plainpassword){
         if (!plainpassword) return "";
         try{
-            return  crypto.createHmac('sha256',this.salt)
+            return  crypto.createHmac("sha256",this.salt)
             .update(plainpassword)
             .digest('hex');
 
