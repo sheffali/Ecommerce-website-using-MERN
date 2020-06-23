@@ -3,6 +3,7 @@ const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
 
+//get product
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category")
@@ -17,6 +18,7 @@ exports.getProductById = (req, res, next, id) => {
     });
 };
 
+//create product
 exports.createProduct = (req, res) => {
   let form = new formidable.IncomingForm();
   form.keepExtensions = true;
@@ -28,20 +30,14 @@ exports.createProduct = (req, res) => {
       });
     }
     //destructure the fields
-    const {description,price,category,stock}=fields;
+    const { name, description, price, category, stock } = fields;
 
-    if(
-      !name ||
-      !description||
-      !category||
-      !stock)
-      {
-        return res.status(400).json({
-          error:"please inclue all fields"
-        })
+    if (!name || !description || !price || !category || !stock) {
+      return res.status(400).json({
+        error: "Please include all fields"
+      });
     }
     let product = new Product(fields);
-
     //handle file here
     if (file.photo) {
       if (file.photo.size > 3000000) {
@@ -52,6 +48,7 @@ exports.createProduct = (req, res) => {
       product.photo.data = fs.readFileSync(file.photo.path);
       product.photo.contentType = file.photo.type;
     }
+     //console.log(product);
 
     //save to the DB
     product.save((err, product) => {
@@ -64,3 +61,91 @@ exports.createProduct = (req, res) => {
     });
   });
 };
+
+exports.getProduct=(req,res)=>{
+ req.product.photo = undefined
+  return res.json(req.product)
+}
+//middleware
+exports.photo=(req,res,next)=>{
+  if(req.produc.photo.data){
+    res.set("Content-Type",req.product.photo.contentType)
+    return res.send(req.product.photo.data)
+  }
+next();
+}
+
+//delete controller
+exports.deleteProduct=(req,res)=>{
+let product=re.product
+product.remove((err,deletedProduct)=>{
+  if (err) {
+    return res.stats(400).json({
+        error:"FAILED TO DELETE"
+    }); 
+}
+res.json({
+    message : "Deletion success",
+    deletedProduct
+});
+
+})
+
+}
+
+//update controller
+exports.updateProduct=(req,res)=>{
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+
+  form.parse(req, (err, fields, file) => {
+    if (err) {
+      return res.status(400).json({
+        error: "problem with image"
+      });
+    }
+   //updation code
+    let product = req.product;
+    product = _.extend(product,fields)
+
+    //handle file here
+    if (file.photo) {
+      if (file.photo.size > 3000000) {
+        return res.status(400).json({
+          error: "File size too big!"
+        });
+      }
+      product.photo.data = fs.readFileSync(file.photo.path);
+      product.photo.contentType = file.photo.type;
+    }
+    //save to the DB
+    product.save((err, product) => {
+      if (err) {
+        res.status(400).json({
+          error: "Updation  of product failed"
+        });
+      }
+      res.json(product);
+    });
+  });
+  
+}
+
+//listing controller
+exports.getAllProducts=(req,res)=>{
+  let limit = req.query.limit ? parseInt(req.query.limit): 8
+  let sortBy=req.query.sortBy ? req.query.sortBy: "_id"
+
+Product.find()
+.select("-photo")
+.populate("category")
+.sort([[sortBy,"asc"]])
+.limit(limit)
+.exec((err,products)=>{
+  if(err){
+    return res.status(400).json({
+      error :"NO PRODUCT FOUND"
+    })
+  }
+  res.json(products)
+})}
