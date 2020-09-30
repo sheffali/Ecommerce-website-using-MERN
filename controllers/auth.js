@@ -96,3 +96,24 @@ if(req.profile.role ==0)
   next();
 }
 
+//checking if email exists already or not
+exports.checkEmail=(req, res, next)=> {
+  var email = req.body.email;
+  var checkexistingemail = User.findOne({ email: email });
+  checkexistingemail.exec((err, data) => {
+    if (err){
+      return  res.status(403).json({
+        error:"Some Error Occured"
+      });
+
+    }
+    if (data) {
+      return res.json({
+        message: "Email Already Exists"
+   
+      }); 
+    }
+    next();
+  });
+}
+
